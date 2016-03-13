@@ -1,3 +1,13 @@
+/**
+* 네이버 모바일웹 메인 제목들에 언론사,필자 추가
+*
+* author: cezips@gmail.com
+* date: 2016-03-13
+*
+* 네이버 URL parameta:
+*   oid= 언론사아이디
+*   aid= 글아이디
+*/
 fetch('/include/grid/panel_ENT.shtml')
     .then(function(res) {
         return res.text();
@@ -6,7 +16,90 @@ fetch('/include/grid/panel_ENT.shtml')
         //console.log(resText);
         let doc = document.createElement('body');
         doc.innerHTML = resText;
-        let blocks = document.querySelectorAll('.brick-vowel .grid1_inner');
-        console.log(blocks);
+        let leftItem = document.querySelectorAll('[data-section="ENT"] .ut_item');
+        let rightItem = document.querySelectorAll('.utl_item');
+
+        for(let i=0; i < leftItem.length; i++) {
+            let item = leftItem[i];
+            let anchor = item.querySelector('a');
+            let href = anchor.getAttribute('href');
+            if (!href) {
+                continue;
+            }
+
+            if (/m\.entertain\.naver\.com|m\.news\.naver\.com/i.test(href)) {
+                // 글 direct url 이면 글 내용 fetch
+                let aid = getQueryVariable(href, "aid");
+                if (aid) {
+                    //console.info('fetch article', href);
+                    fetch(href).then(function(res){
+                        return res.text();
+                    }).then(function(resText) {
+                        let detailDoc = document.createElement('body');
+                        detailDoc.innerHTML = resText;
+
+                        let content = '',
+                            author = '';
+
+                        // 언론사명
+                        // oid 값 데이터 테이블을 만들고 비교하여 만드는것도 다른 방법
+                        let pressLogoImg = detailDoc.querySelector('.press_logo > img');
+                        let pressName = pressLogoImg.getAttribute('alt');
+                        // 기사입력, 최종수정
+                        let regDate = detailDoc.querySelector('.author');
+                        // 기사 내용
+                        content = detailDoc.querySelector('.newsct_body').innerText;
+                        if (content) {
+                            // 필자
+                            author = /(\[.+ 기자\])/i.exec(content);
+                            if (!author) {
+                                author = /([0-9a-zA-Z][_0-9a-zA-Z-]*@[_0-9a-zA-Z-]+(\.[_0-9a-zA-Z-]+){1,2}$)/i.exec(content);
+                            }
+
+                            // 필자정보 못찾겠으면 공백 할당
+                            if (!author) {
+                                author = '';
+                            } else {
+                                author = ' / '+ author;
+                            }
+                        }
+
+                        // 파싱한 자료들로 새 HTML 요소를 만들고
+                        let itemDescElement = document.createElement('div');
+                        itemDescElement.setAttribute('style', 'font-size:.9em;color:#4e88cf;line-height:1.7rem');
+                        itemDescElement.innerHTML = pressName + author + regDate.outerHTML;
+                        // 현 항목 끝에 추가
+                        item.appendChild(itemDescElement);
+
+                        if (itemDescElement) console.info(itemDescElement.innerText);
+                    }).catch(function(err){
+                        console.error(err);
+                    });
+
+                    continue;
+                }
+            }
+        }
     })
     .catch(function(err) { console.error(err); });
+
+/**
+* Get the value of Querystring variable
+* https://css-tricks.com/snippets/javascript/get-url-variables/
+*
+* Example URL:
+*   http://www.example.com/index.php?id=1&image=awesome.jpg
+*   Calling getQueryVariable("id") - would return "1".
+*   Calling getQueryVariable("image") - would return "awesome.jpg".
+*/
+function getQueryVariable(query, variable)
+{
+    let vars = query.split("&");
+
+    for (let i=0;i<vars.length;i++) {
+       let pair = vars[i].split("=");
+       if(pair[0] == variable){ return pair[1]; }
+    }
+
+    return(false);
+}
