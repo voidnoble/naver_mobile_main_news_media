@@ -119,8 +119,8 @@ function printPanel($tabId, $naverDomain, $panelFilePath)
 
     parseItems($items);
 
-    // lazy-load img to direct load - Front-end 에서 처리하도록 해둠
-    //$doc->outertext = str_replace('img data-src', 'img src', $doc->outertext);
+    // lazy-load img to direct load
+    $doc->outertext = str_replace('img data-src', 'img src', $doc->outertext);
 
     echo($doc->outertext);
 }
