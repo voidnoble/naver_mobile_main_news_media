@@ -31,12 +31,21 @@ $tabId = "news";
 $items = $body->find('.wrp.id_{$tabId} .ut_item');
 parseItems($items);
 
+// jQuery 삽입
 $userJS = '<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.1.min.js"></script>';
+// lazy-load 이미지들 그냥 로딩하도록
+$userJS .= '<script>
+    $(function(){
+        $("#mflick").attr("style", "");
+        //$("img").each(function(){ if ($(this).data("src")) $(this).attr("src", $(this).data("src")); });
+        $(".fade").css("opacity", "1");
+    });
+</script>';
 
 // Append a element
 $body->innertext = $body->innertext . $userJS;
 
-echo $dom;
+echo($dom);
 
 
 // 패널 id들
@@ -109,6 +118,9 @@ function printPanel($tabId, $naverDomain, $panelFilePath)
     }
 
     parseItems($items);
+
+    // lazy-load img to direct load - Front-end 에서 처리하도록 해둠
+    //$doc->outertext = str_replace('img data-src', 'img src', $doc->outertext);
 
     echo($doc->outertext);
 }
@@ -219,12 +231,36 @@ function parseDetail($href)
 
     // 탭아이디 CARGAME 중 자동차의 경우 .author_info 2개에 각각 언론사,글쓴이 정보가 있다
     if (strpos($href, 'auto.naver.com') !== false) {
-        $authorInfos = $detailDoc->find('.author_info');
-        foreach ($authorInfos as $authorInfo) {
-            $itemDesc .= $authorInfo->outertext;
+        $authorInfos = $detailDoc->find('.article_info');
+        if (is_array($authorInfos)) {
+            foreach ($authorInfos as $authorInfo) {
+                $itemDesc .= $authorInfo->outertext;
+            }
         }
+        else {
+            $authorInfos = $detailDoc->find('.author_info');
+            foreach ($authorInfos as $authorInfo) {
+                $itemDesc .= $authorInfo->outertext;
+            }
+        }
+
         // CARGAME Detail 페이지가 euc-kr 로 되어 있는듯... UTF-8 로 변환
         $itemDesc = iconv('euc-kr', 'utf-8', $itemDesc);
+        // 반환하고 끝냄
+        return $itemDesc;
+    }
+    // 네이버포스트의 경우
+    elseif (strpos($href, 'post.naver.com') !== false) {
+        // 필자명
+        //$author = $detailDoc->find('.se_container', 0);
+        $author = $detailDoc->find('.se_author', 0);
+        if (is_object($author)) {
+            $itemDesc = '<p class="uct_origin"><span class="uct_s">'. $author->innertext .'</span></p>';
+        }
+
+        // CARGAME Detail 페이지가 euc-kr 로 되어 있는듯... UTF-8 로 변환
+        //$itemDesc = iconv('euc-kr', 'utf-8', $itemDesc);
+
         // 반환하고 끝냄
         return $itemDesc;
     }
