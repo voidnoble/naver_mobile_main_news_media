@@ -1,0 +1,16 @@
+{
+    "name": "voidnoble/naver_mobile_main_news_media",
+    "require": {
+        "curl/curl": "^1.3",
+        "symfony/dom-crawler": "^3.0",
+        "symfony/css-selector": "^3.0",
+        "sunra/php-simple-html-dom-parser": "^1.5"
+    },
+    "license": "GPL v3",
+    "authors": [
+        {
+            "name": "voidnoble",
+            "email": "cezips@gmail.com"
+        }
+    ]
+}

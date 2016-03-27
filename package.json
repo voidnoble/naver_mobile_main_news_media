@@ -1,0 +1,23 @@
+{
+  "name": "naver_mobile_main_news_media",
+  "version": "1.0.0",
+  "description": "Naver Mobile Web Main news media description",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com.my:voidnoble/naver_mobile_main_news_media.git"
+  },
+  "keywords": [
+    "naver",
+    "news",
+    "media"
+  ],
+  "author": "voidnoble",
+  "license": "MIT",
+  "dependencies": {
+    "http2": "^3.3.2"
+  }
+}
